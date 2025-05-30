@@ -214,22 +214,17 @@ fn background_graph(content_graph: TextContent, server: String) {
                 // Plot
                 //
 
-                let config = Config::default().with_width(graph_width).with_height(graph_height);
-                let content1 = plot(bitrates_scaled.clone(), config);
-                let units_pad = left_pad(units.to_string(), 6);
-                let content2 = replace_at_start(&content1, &units_pad);
+               {
+                  let config = Config::default().with_width(graph_width).with_height(graph_height);
+                  let content1 = plot(bitrates_scaled.clone(), config);
+                  let units_pad = left_pad(units.to_string(), 6);
+                  let content2 = replace_at_start(&content1, &units_pad);
 
-                content_graph.set_content(&content2);
+                  content_graph.set_content(&content2);
 
-                // let content3 = content2 + "\n";
-                // save_to_file("graph.txt".to_string(), &content3);
-
-                /*
-                if bitrates.len() > 3 {
-                    let tmp = format!("{} {} {}\n", bitrates[0], bitrates[1], bitrates[2]);
-                    save_to_file("graph.txt".to_string(), &tmp);
-                }
-                */
+                  // let content3 = content2 + "\n";
+                  // save_to_file("graph.txt".to_string(), &content3);
+               }
             }
         }
         else {
