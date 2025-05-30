@@ -1,0 +1,15 @@
+[package]
+name = "iperf3-tui"
+version = "0.1.0"
+authors = ["Dave McKellar <3187057+dmdmdm@users.noreply.github.com>"]
+edition = "2024"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+cursive = "0.21.1"
+lazy_static = "1.4"
+nix = { version = "0.30.1", features = [ "term", "process", "signal" ] }
+regex = "1.11.1"
+rasciigraph = "0.2"
+timeout-readwrite = "0.4.0"
