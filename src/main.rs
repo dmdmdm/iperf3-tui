@@ -26,7 +26,7 @@ fn has_iperf3() -> bool {
 }
 
 lazy_static! {
-    static ref TCP_DUMP_PID: Arc<Mutex<Option<i32>>> = Arc::new(Mutex::new(None));
+    static ref IPERF3_PID: Arc<Mutex<Option<i32>>> = Arc::new(Mutex::new(None));
     static ref SCREEN_SIZE: Arc<Mutex<Option<XY<usize>>>> = Arc::new(Mutex::new(None));
 }
 
@@ -75,7 +75,7 @@ fn background_graph(content_graph: TextContent, server: String) {
     let child = result.unwrap();
 
     {   // Save PID
-        let mut pid_opt = TCP_DUMP_PID.lock().unwrap();
+        let mut pid_opt = IPERF3_PID.lock().unwrap();
         let pid_u32:u32 = child.id();
         let pid_i32:i32 = pid_u32.try_into().unwrap();
         *pid_opt = Some(pid_i32);
@@ -235,7 +235,7 @@ fn background_graph(content_graph: TextContent, server: String) {
 
 fn on_quit(siv: &mut Cursive) {
     {   // Get PID
-        let pid_opt = TCP_DUMP_PID.lock().unwrap();
+        let pid_opt = IPERF3_PID.lock().unwrap();
         if pid_opt.is_some() {
             let pid_struct = Pid::from_raw(pid_opt.unwrap());
             kill(pid_struct, Signal::SIGKILL).expect("Could not kill child process");
