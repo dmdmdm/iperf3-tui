@@ -12,7 +12,8 @@ Linux only
     cargo run <iperf3-server>
 
 See public iperf3 servers on these pages:
-- https://github.com/R0GGER/public-iperf3-servers 
+- https://github.com/R0GGER/public-iperf3-servers
+- https://iperf3serverlist.net
 - https://iperf.fr/iperf-servers.php
 
 Or run your own iperf3 server:
