@@ -281,7 +281,7 @@ fn main() {
                .child(pan3)
                .child(box4)
        )
-       .title("ipref3-tui")
+       .title("iperf3-tui")
        .h_align(HAlign::Center),
     );
 
