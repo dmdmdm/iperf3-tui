@@ -1,5 +1,5 @@
 # iperf3-tui
-Draw a speed test graph in your terminal
+Draw a moving speed test graph in your terminal
 
 # Screenshot
 ![Screenshot](iperf3-tui.png)
