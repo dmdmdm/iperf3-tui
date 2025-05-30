@@ -22,7 +22,7 @@ use std::io::prelude::*;
 #[allow(unused_variables)]
 
 fn has_iperf3() -> bool {
-   return Command::new("which").arg("iperf3").stdout(Stdio::null()).stderr(Stdio::null()).status().expect("Which not run 'which iperf3'").success();
+   return Command::new("which").arg("iperf3").stdout(Stdio::null()).stderr(Stdio::null()).status().expect("Could not run 'which iperf3'").success();
 }
 
 lazy_static! {
