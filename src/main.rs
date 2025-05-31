@@ -129,6 +129,9 @@ fn background_graph(content_graph: TextContent, server: String) {
     let mut bitrates = Vec::<f64>::new();
     // let mut times = Vec::<f64>::new();
 
+    let factor = 1000.0;
+    let factor_reciprocal = 1.0 / factor;
+
     let mut byte_line = Vec::new();
     for byte_result in stdout.bytes() {
         let byte = byte_result.unwrap();
@@ -199,15 +202,15 @@ fn background_graph(content_graph: TextContent, server: String) {
 
                 let mut bitrates_scaled = bitrates.clone();
                 let average = average(&bitrates_scaled);
-                if average > 1024.0 {
+                if average > factor {
                     for item in &mut bitrates_scaled {
-                        *item = *item / 1024.0;
+                        *item = *item / factor;
                     }
                     units = "Gbits";
                 }
-                else if average < 0.001 {
+                else if average < factor_reciprocal {
                     for item in &mut bitrates_scaled {
-                        *item = *item * 1024.0;
+                        *item = *item * factor;
                     }
                     units = "Kbits";
                 }
