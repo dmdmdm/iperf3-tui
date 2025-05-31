@@ -123,7 +123,7 @@ fn background_graph(content_graph: TextContent, server: String) {
 
     // let lines = Vec::<String>::new();
     let re_main = Regex::new("\\[([^\\]]+)\\]\\s(.*)$").unwrap();
-    let re_time = Regex::new("([\\d\\.]+)-([\\d\\.]+)").unwrap();
+    // let re_time = Regex::new("([\\d\\.]+)-([\\d\\.]+)").unwrap();
     let re_bitrate = Regex::new("([\\d\\.]+)\\s(\\w+)/sec").unwrap();
 
     let mut bitrates = Vec::<f64>::new();
@@ -155,12 +155,14 @@ fn background_graph(content_graph: TextContent, server: String) {
                 // Start or end
             }
             else if !remainder.is_empty() {
-                let caps_time = re_time.captures(&remainder);
+               /*
+               let caps_time = re_time.captures(&remainder);
                 if caps_time.is_some() {
-                    // let c = caps_time.unwrap();
-                    // second = &c.get(1).unwrap().as_str().trim();
+                    let c = caps_time.unwrap();
+                    second = &c.get(1).unwrap().as_str().trim();
                 }
-
+                */
+                  
                 let caps_bitrate = re_bitrate.captures(&remainder);
                 if caps_bitrate.is_some() {
                     let c = caps_bitrate.unwrap();
