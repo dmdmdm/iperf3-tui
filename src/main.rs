@@ -126,7 +126,7 @@ fn replace_at_start(original: &str, replacement: &str) -> String {
 }
 
 #[allow(dead_code)]
-fn save_to_file(filename: String, content: &String) {
+fn save_to_file(filename: &str, content:  &str) {
     let mut file = OpenOptions::new().append(true).create(true).open(filename).unwrap();
     write!(&mut file, "{}", content).expect("Could not write to file");
 }
