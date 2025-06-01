@@ -29,8 +29,7 @@ lazy_static! {
 
 fn save_pid(pid_in: u32) {
     let mut pid_opt = IPERF3_PID.lock().unwrap();
-    let pid_u32:u32 = pid_in;
-    let pid_i32:i32 = pid_u32.try_into().unwrap();
+    let pid_i32:i32 = pid_in.try_into().unwrap();
     *pid_opt = Some(pid_i32);
 }
 
