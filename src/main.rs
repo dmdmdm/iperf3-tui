@@ -36,6 +36,48 @@ fn average(numbers: &Vec::<f64>) -> f64 {
     return sum / count;
 }
 
+fn scale(units: &mut String, bitrates_in: &Vec::<f64>) -> Vec::<f64> {
+    let factor = 1000.0;
+    let factor_squared = factor * factor;
+    let factor_cubed = factor_squared * factor;
+    let factor_reciprocal = 1.0 / factor;
+    let factor_reciprocal_squared = factor_reciprocal * factor_reciprocal;
+
+    let mut bitrates_scaled = bitrates_in.clone();
+    let average = average(&bitrates_scaled);
+    if average > factor_cubed {
+        for item in &mut bitrates_scaled {
+            *item = *item / factor_cubed;
+        }
+        *units = "Pbits".to_string();
+    }
+    else if average > factor_squared {
+        for item in &mut bitrates_scaled {
+           *item = *item / factor_squared;
+        }
+        *units = "Tbits".to_string();
+    }
+    else if average > factor {
+        for item in &mut bitrates_scaled {
+           *item = *item / factor;
+        }
+        *units = "Gbits".to_string();
+    }
+    else if average < factor_reciprocal_squared {
+        for item in &mut bitrates_scaled {
+            *item = *item * factor_reciprocal_squared;
+        }
+        *units = "bits".to_string();
+    }
+    else if average < factor_reciprocal {
+        for item in &mut bitrates_scaled {
+            *item = *item * factor;
+        }
+        *units = "Kbits".to_string();
+    }
+    return bitrates_scaled;
+}
+
 fn left_pad(str_in: String, n: usize) -> String {
     let mut s = str_in;
     while s.len() < n {
@@ -128,10 +170,7 @@ fn background_graph(content_graph: TextContent, server: String) {
 
     let mut bitrates = Vec::<f64>::new();
     // let mut times = Vec::<f64>::new();
-
-    let factor = 1000.0;
-    let factor_reciprocal = 1.0 / factor;
-
+    
     let mut byte_line = Vec::new();
     for byte_result in stdout.bytes() {
         let byte = byte_result.unwrap();
@@ -142,8 +181,8 @@ fn background_graph(content_graph: TextContent, server: String) {
             // let mut id = "";
             let mut remainder = "";
             // let mut second = "";
-            let mut bitrate = "";
-            let mut units = "";
+            let mut bitrate: String = "".to_string();
+            let mut units: String = "".to_string();
             let caps_main = re_main.captures(&line);
             if caps_main.is_some() {
                 let c = caps_main.unwrap();
@@ -158,19 +197,19 @@ fn background_graph(content_graph: TextContent, server: String) {
                 // Start or end
             }
             else if !remainder.is_empty() {
-               /*
-               let caps_time = re_time.captures(&remainder);
+                /*
+                let caps_time = re_time.captures(&remainder);
                 if caps_time.is_some() {
                     let c = caps_time.unwrap();
                     second = &c.get(1).unwrap().as_str().trim();
                 }
                 */
-                  
+
                 let caps_bitrate = re_bitrate.captures(&remainder);
                 if caps_bitrate.is_some() {
                     let c = caps_bitrate.unwrap();
-                    bitrate = &c.get(1).unwrap().as_str().trim();
-                    units = &c.get(2).unwrap().as_str().trim();
+                    bitrate = c.get(1).unwrap().as_str().trim().to_string();
+                    units = c.get(2).unwrap().as_str().trim().to_string();
                 }
             }
 
@@ -196,40 +235,24 @@ fn background_graph(content_graph: TextContent, server: String) {
                     // times.remove(0);
                 }
 
-                //
                 // Scale
-                //
-
-                let mut bitrates_scaled = bitrates.clone();
-                let average = average(&bitrates_scaled);
-                if average > factor {
-                    for item in &mut bitrates_scaled {
-                        *item = *item / factor;
-                    }
-                    units = "Gbits";
-                }
-                else if average < factor_reciprocal {
-                    for item in &mut bitrates_scaled {
-                        *item = *item * factor;
-                    }
-                    units = "Kbits";
-                }
+                let bitrates_scaled = scale(&mut units, &bitrates);
 
                 //
                 // Plot
                 //
 
-               {
-                  let config = Config::default().with_width(graph_width).with_height(graph_height);
-                  let content1 = plot(bitrates_scaled.clone(), config);
-                  let units_pad = left_pad(units.to_string(), 6);
-                  let content2 = replace_at_start(&content1, &units_pad);
+                {
+                    let config = Config::default().with_width(graph_width).with_height(graph_height);
+                    let content1 = plot(bitrates_scaled.clone(), config);
+                    let units_pad = left_pad(units.to_string(), 6);
+                    let content2 = replace_at_start(&content1, &units_pad);
+    
+                    content_graph.set_content(&content2);
 
-                  content_graph.set_content(&content2);
-
-                  // let content3 = content2 + "\n";
-                  // save_to_file("graph.txt".to_string(), &content3);
-               }
+                    // let content3 = content2 + "\n";
+                    // save_to_file("graph.txt".to_string(), &content3);
+                }
             }
         }
         else {
@@ -308,9 +331,8 @@ mod tests {
     #[test]
     fn it_works() {
         if has_iperf3() {
-           // TODO
-           return;
+            // TODO
+            return;
         }
     }
 }
-
