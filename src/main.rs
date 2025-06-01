@@ -30,6 +30,41 @@ lazy_static! {
     static ref SCREEN_SIZE: Arc<Mutex<Option<XY<usize>>>> = Arc::new(Mutex::new(None));
 }
 
+fn save_pid(pid_in: u32) {
+    let mut pid_opt = IPERF3_PID.lock().unwrap();
+    let pid_u32:u32 = pid_in;
+    let pid_i32:i32 = pid_u32.try_into().unwrap();
+    *pid_opt = Some(pid_i32);
+}
+
+fn kill_pid() {
+    let pid_opt = IPERF3_PID.lock().unwrap();
+    if pid_opt.is_some() {
+        let pid_struct = Pid::from_raw(pid_opt.unwrap());
+        kill(pid_struct, Signal::SIGKILL).expect("Could not kill child process");
+    }
+}
+
+fn save_screen_size(ss_in: XY<usize>) {
+    let mut ss_opt = SCREEN_SIZE.lock().unwrap();
+    *ss_opt = Some(ss_in);
+}
+
+fn get_screen_size() -> (u32, u32) {
+    let screen_width: u32;
+    let screen_height: u32;
+    let ss_opt = SCREEN_SIZE.lock().unwrap();
+    if ss_opt.is_some() {
+        screen_width = ss_opt.unwrap().x.try_into().unwrap();
+        screen_height = ss_opt.unwrap().y.try_into().unwrap();
+    }
+    else {  // Defaults
+        screen_width = 80;
+        screen_height = 24;
+    }
+    return (screen_width, screen_height);
+}
+
 fn average(numbers: &Vec::<f64>) -> f64 {
     let sum:f64  = numbers.iter().sum();
     let count = numbers.len() as f64;
@@ -116,12 +151,7 @@ fn background_graph(content_graph: TextContent, server: String) {
     }
     let child = result.unwrap();
 
-    {   // Save PID
-        let mut pid_opt = IPERF3_PID.lock().unwrap();
-        let pid_u32:u32 = child.id();
-        let pid_i32:i32 = pid_u32.try_into().unwrap();
-        *pid_opt = Some(pid_i32);
-    }
+    save_pid(child.id());
 
     //
     // stderr
@@ -214,15 +244,7 @@ fn background_graph(content_graph: TextContent, server: String) {
             }
 
             if !bitrate.is_empty() {
-                let mut screen_width = 80;
-                let mut screen_height = 24;
-                {   // Get screen size
-                    let ss_opt = SCREEN_SIZE.lock().unwrap();
-                    if ss_opt.is_some() {
-                        screen_width = ss_opt.unwrap().x.try_into().unwrap();
-                        screen_height = ss_opt.unwrap().y.try_into().unwrap();
-                    }
-                }
+                let (screen_width, screen_height) = get_screen_size();
 
                 let bitrate_f64:f64 = bitrate.parse().unwrap();
                 bitrates.push(bitrate_f64.to_owned());
@@ -262,14 +284,7 @@ fn background_graph(content_graph: TextContent, server: String) {
 }
 
 fn on_quit(siv: &mut Cursive) {
-    {   // Get PID
-        let pid_opt = IPERF3_PID.lock().unwrap();
-        if pid_opt.is_some() {
-            let pid_struct = Pid::from_raw(pid_opt.unwrap());
-            kill(pid_struct, Signal::SIGKILL).expect("Could not kill child process");
-        }
-    }
-
+    kill_pid();
     siv.quit();
 }
 
@@ -316,9 +331,7 @@ fn main() {
 
     // Add a global callback that will be called when the layout is done
     siv.add_global_callback(Event::Refresh, |s| {
-        let size = s.screen_size();
-        let mut ss_opt = SCREEN_SIZE.lock().unwrap();
-        *ss_opt = Some(size);
+        save_screen_size(s.screen_size());
     });
 
     siv.run();
