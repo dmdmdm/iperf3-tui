@@ -62,7 +62,7 @@ fn get_screen_size() -> (u32, u32) {
     return (screen_width, screen_height);
 }
 
-fn average(numbers: &Vec::<f64>) -> f64 {
+fn average(numbers: &[f64]) -> f64 {
     let sum:f64  = numbers.iter().sum();
     let count = numbers.len() as f64;
     return sum / count;
