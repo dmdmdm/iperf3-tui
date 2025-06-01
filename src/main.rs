@@ -17,9 +17,6 @@ use cursive::traits::*;
 use rasciigraph::{plot, Config};
 use std::fs::OpenOptions;
 use std::io::prelude::*;
-#[allow(unreachable_code)]
-#[allow(unused_assignments)]
-#[allow(unused_variables)]
 
 fn has_iperf3() -> bool {
    return Command::new("which").arg("iperf3").stdout(Stdio::null()).stderr(Stdio::null()).status().expect("Could not run 'which iperf3'").success();
@@ -191,16 +188,11 @@ fn background_graph(content_graph: TextContent, server: String) {
     }
     let stdout = stdout_result.unwrap();
 
-    // content_graph.set_content("iperf3 started, waiting for reply");
-
-    // let lines = Vec::<String>::new();
     let re_main = Regex::new("\\[([^\\]]+)\\]\\s(.*)$").unwrap();
-    // let re_time = Regex::new("([\\d\\.]+)-([\\d\\.]+)").unwrap();
     let re_bitrate = Regex::new("([\\d\\.]+)\\s(\\w+)/sec").unwrap();
 
     let mut bitrates = Vec::<f64>::new();
-    // let mut times = Vec::<f64>::new();
-    
+  
     let mut byte_line = Vec::new();
     for byte_result in stdout.bytes() {
         let byte = byte_result.unwrap();
@@ -208,15 +200,12 @@ fn background_graph(content_graph: TextContent, server: String) {
             let line = String::from_utf8_lossy(&byte_line).to_string();
             byte_line.clear();
 
-            // let mut id = "";
             let mut remainder = "";
-            // let mut second = "";
             let mut bitrate: String = "".to_string();
             let mut units: String = "".to_string();
             let caps_main = re_main.captures(&line);
             if caps_main.is_some() {
                 let c = caps_main.unwrap();
-                // id = &c.get(1).unwrap().as_str().trim();
                 remainder = &c.get(2).unwrap().as_str().trim();
             }
 
@@ -227,14 +216,6 @@ fn background_graph(content_graph: TextContent, server: String) {
                 // Start or end
             }
             else if !remainder.is_empty() {
-                /*
-                let caps_time = re_time.captures(&remainder);
-                if caps_time.is_some() {
-                    let c = caps_time.unwrap();
-                    second = &c.get(1).unwrap().as_str().trim();
-                }
-                */
-
                 let caps_bitrate = re_bitrate.captures(&remainder);
                 if caps_bitrate.is_some() {
                     let c = caps_bitrate.unwrap();
@@ -248,13 +229,10 @@ fn background_graph(content_graph: TextContent, server: String) {
 
                 let bitrate_f64:f64 = bitrate.parse().unwrap();
                 bitrates.push(bitrate_f64.to_owned());
-                // let second_f64:f64 = second.parse().unwrap();
-                // times.push(second_f64.to_owned());
                 let graph_width = screen_width - 10;
                 let graph_height = screen_height - 8;
                 if bitrates.len() > graph_width as usize {
                     bitrates.remove(0);
-                    // times.remove(0);
                 }
 
                 // Scale
@@ -271,10 +249,7 @@ fn background_graph(content_graph: TextContent, server: String) {
                     let content2 = replace_at_start(&content1, &units_pad);
     
                     content_graph.set_content(&content2);
-
-                    // let content3 = content2 + "\n";
-                    // save_to_file("graph.txt".to_string(), &content3);
-                }
+               }
             }
         }
         else {
