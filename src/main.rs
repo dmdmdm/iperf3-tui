@@ -267,7 +267,7 @@ fn background_graph(content_graph: TextContent, server: String) {
                 {
                     let config = Config::default().with_width(graph_width).with_height(graph_height);
                     let content1 = plot(bitrates_scaled.clone(), config);
-                    let units_pad = left_pad(units.to_string(), 6);
+                    let units_pad = left_pad(units, 6);
                     let content2 = replace_at_start(&content1, &units_pad);
     
                     content_graph.set_content(&content2);
