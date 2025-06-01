@@ -48,17 +48,18 @@ fn save_screen_size(ss_in: XY<usize>) {
 }
 
 fn get_screen_size() -> (u32, u32) {
-    let screen_width: u32;
-    let screen_height: u32;
+    let mut screen_width: u32 = 0;
+    let mut screen_height: u32 = 0;
+
     let ss_opt = SCREEN_SIZE.lock().unwrap();
     if ss_opt.is_some() {
         screen_width = ss_opt.unwrap().x.try_into().unwrap();
         screen_height = ss_opt.unwrap().y.try_into().unwrap();
     }
-    else {  // Defaults
-        screen_width = 80;
-        screen_height = 24;
-    }
+
+    // Defaults
+    if screen_width == 0 { screen_width = 80; }
+    if screen_height == 0 { screen_height = 24; }
     return (screen_width, screen_height);
 }
 
