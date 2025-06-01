@@ -68,45 +68,45 @@ fn average(numbers: &[f64]) -> f64 {
     return sum / count;
 }
 
+// units is in/out
 fn scale(units: &mut String, bitrates_in: &Vec::<f64>) -> Vec::<f64> {
-    let factor = 1000.0;
-    let factor_squared = factor * factor;
-    let factor_cubed = factor_squared * factor;
-    let factor_reciprocal = 1.0 / factor;
-    let factor_reciprocal_squared = factor_reciprocal * factor_reciprocal;
+    let step = 1000.0;
+    let step_squared = step * step;
+    let step_cubed = step_squared * step;
+    let step_reciprocal = 1.0 / step;
+    let step_reciprocal_squared = step_reciprocal * step_reciprocal;
+    let step_reciprocal_cubed = step_reciprocal_squared * step_reciprocal;
 
     let mut bitrates_scaled = bitrates_in.clone();
     let average = average(&bitrates_scaled);
-    if average > factor_cubed {
-        for item in &mut bitrates_scaled {
-            *item = *item / factor_cubed;
-        }
+    let mut multiply_by = 1.0;
+    if average > step_cubed {
+        multiply_by = step_reciprocal_cubed;
         *units = "Pbits".to_string();
     }
-    else if average > factor_squared {
-        for item in &mut bitrates_scaled {
-           *item = *item / factor_squared;
-        }
+    else if average > step_squared {
+        multiply_by = step_reciprocal_squared;
         *units = "Tbits".to_string();
     }
-    else if average > factor {
-        for item in &mut bitrates_scaled {
-           *item = *item / factor;
-        }
+    else if average > step {
+        multiply_by = step_reciprocal;
         *units = "Gbits".to_string();
     }
-    else if average < factor_reciprocal_squared {
-        for item in &mut bitrates_scaled {
-            *item = *item * factor_reciprocal_squared;
-        }
+    else if average < step_reciprocal_squared {
+        multiply_by = step_squared;
         *units = "bits".to_string();
     }
-    else if average < factor_reciprocal {
-        for item in &mut bitrates_scaled {
-            *item = *item * factor;
-        }
+    else if average < step_reciprocal {
+        multiply_by = step;
         *units = "Kbits".to_string();
     }
+
+    if multiply_by != 1.0 {
+        for item in &mut bitrates_scaled {
+            *item *= multiply_by;
+        }
+    }
+
     return bitrates_scaled;
 }
 
@@ -126,7 +126,7 @@ fn replace_at_start(original: &str, replacement: &str) -> String {
 }
 
 #[allow(dead_code)]
-fn save_to_file(filename: &str, content:  &str) {
+fn save_to_file(filename: &str, content: &str) {
     let mut file = OpenOptions::new().append(true).create(true).open(filename).unwrap();
     write!(&mut file, "{}", content).expect("Could not write to file");
 }
@@ -192,7 +192,7 @@ fn background_graph(content_graph: TextContent, server: String) {
     let re_bitrate = Regex::new("([\\d\\.]+)\\s(\\w+)/sec").unwrap();
 
     let mut bitrates = Vec::<f64>::new();
-  
+    
     let mut byte_line = Vec::new();
     for byte_result in stdout.bytes() {
         let byte = byte_result.unwrap();
@@ -247,9 +247,8 @@ fn background_graph(content_graph: TextContent, server: String) {
                     let content1 = plot(bitrates_scaled.clone(), config);
                     let units_pad = left_pad(units, 6);
                     let content2 = replace_at_start(&content1, &units_pad);
-    
                     content_graph.set_content(&content2);
-               }
+                }
             }
         }
         else {
