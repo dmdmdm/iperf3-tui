@@ -1,8 +1,8 @@
-use std::env;
 use std::io::Read;
 use std::process;
 use std::process::{Command, Stdio};
 use std::sync::{Arc, Mutex};
+use clap::Parser;
 use lazy_static::lazy_static;
 use nix::unistd::Pid;
 use nix::sys::signal::{kill,Signal};
@@ -131,17 +131,31 @@ fn save_to_file(filename: &str, content: &str) {
     write!(&mut file, "{}", content).expect("Could not write to file");
 }
 
-fn background_graph(content_graph: TextContent, server: String) {
-    let result = Command::new("iperf3")
-       .arg("--forceflush") // Don't buffer between lines
+fn background_graph(content_graph: TextContent, args: Args) {
+    let mut cmd = Command::new("iperf3");
+    cmd.arg("--forceflush") // Don't buffer between lines
        .arg("--interval").arg("1") // Every second
        .arg("--time").arg("0") // Run forever
-       .arg("--format").arg("m")   // In megabits
-       .arg("--client") // We are a client
-       .arg(server.clone())
+       .arg("--format").arg("m");   // In megabits
+
+    // User-supplied options
+    if args.ipv6 { cmd.arg("-6"); }
+    if args.ports.is_some() { cmd.arg("-p").arg(args.ports.unwrap()); }
+    if args.reverse { cmd.arg("-R"); }
+    if args.udp { cmd.arg("-u"); }
+
+    cmd.arg("--client").arg(args.server.clone())
        .stdout(Stdio::piped())
-       .stderr(Stdio::piped())
-       .spawn();
+       .stderr(Stdio::piped());
+
+    /*
+    let flat = format!("{:?}", cmd);
+    content_graph.set_content(flat);
+    sleep(Duration::new(10,0));
+    // process::exit(1);  // TEMP
+    */
+
+    let result = cmd.spawn();
     if result.is_err() {
        content_graph.set_content("Could not run iperf3 - is it installed?");
        return;
@@ -155,7 +169,7 @@ fn background_graph(content_graph: TextContent, server: String) {
     //
   
     {
-        let stderr_msg = format!("Checking connection to {}...", server);
+        let stderr_msg = format!("Checking connection to {}...", args.server.clone());
         content_graph.set_content(stderr_msg);
    
         let stderr_result = child.stderr;
@@ -262,18 +276,43 @@ fn on_quit(siv: &mut Cursive) {
     siv.quit();
 }
 
+#[derive(Parser, Debug)]
+struct Args {   // Alphabetical order by short
+    #[arg(short = '6')]
+    ipv6: bool,
+
+    #[arg(short)]
+    ports: Option<String>,
+
+    #[arg(short = 'R')]
+    reverse: bool,
+
+    #[arg(short)]
+    udp: bool,
+
+    server: String // Mandatory
+}
+
+impl Args {
+    fn friendly(&self) -> String {
+        let mut out:String = self.server.clone();
+
+        if self.ipv6 { out += " IPv6"; }
+        if self.ports.is_some() {out += &(" ports ".to_owned() + &self.ports.clone().unwrap().clone()); }
+        if self.reverse { out += " reverse" }
+        if self.udp { out += " udp" }
+
+        return out;
+    }
+}
+
 fn main() {
     if !has_iperf3() {
         eprintln!("Please install `iperf3`");
         process::exit(1);
     }
 
-    let args: Vec<String> = env::args().collect();
-    if args.len() <= 1 {
-        eprintln!("Usage: iperf3-tui <iperf3-server>");
-        process::exit(1);
-    }
-    let server = args[1].clone();
+    let args = Args::parse();
 
     let mut siv = cursive::default();
     let content_graph = TextContent::new("Starting...");
@@ -282,7 +321,7 @@ fn main() {
        .with_name("tv3");
 
     let box3 = ResizedView::with_full_screen(tv3);
-    let pan3 = Panel::new(box3).title(&server);
+    let pan3 = Panel::new(box3).title(args.friendly());
 
     let tv4 = TextView::new("Press 'q' to quit");
     let box4 = ResizedView::with_min_height(1, tv4);
@@ -299,11 +338,10 @@ fn main() {
 
     siv.add_global_callback('q', on_quit);
 
-    std::thread::spawn(move || { background_graph(content_graph, server) });
+    std::thread::spawn(move || { background_graph(content_graph, args) });
 
     siv.set_fps(1);
 
-    // Add a global callback that will be called when the layout is done
     siv.add_global_callback(Event::Refresh, |s| {
         save_screen_size(s.screen_size());
     });
