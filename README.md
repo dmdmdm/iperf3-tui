@@ -24,10 +24,10 @@ Or run your own iperf3 server:
     cargo run [-6][-p <port-range>][-R][-u] <iperf3-server>
 
 Same meaning as the iperf3 command:
-    -6: Use IPv6
-    -p: port range - eg -p 5200-5209
-    -R: reverse - server sends data
-    -u: Use UDP
+- -6: Use IPv6
+- -p: port range - eg -p 5200-5209
+- -R: reverse - server sends data
+- -u: Use UDP
 
 # Tips
 If the characters of the graph don't show properly in putty:
