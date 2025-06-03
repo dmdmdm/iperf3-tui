@@ -242,7 +242,7 @@ fn background_graph(content_graph: TextContent, args: Args) {
                 bitrates.push(bitrate_f64.to_owned());
                 let graph_width = screen_width - 10;
                 let graph_height = screen_height - 8;
-                if bitrates.len() > graph_width as usize {
+                while bitrates.len() > graph_width as usize {
                     bitrates.remove(0);
                 }
 
