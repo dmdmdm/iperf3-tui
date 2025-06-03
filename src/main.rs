@@ -68,7 +68,11 @@ fn average(numbers: &[f64]) -> f64 {
     return sum / count;
 }
 
-// units is in/out
+// The bitrates come here in Mbits/sec.
+// If the average bitrate is greater than 1000 then we divide all bitrates
+// by 1000 and change the units to Gbit, for example.
+// units: in/out
+// return: Updated bitrates
 fn scale(units: &mut String, bitrates_in: &Vec::<f64>) -> Vec::<f64> {
     let step = 1000.0;
     let step_squared = step * step;
