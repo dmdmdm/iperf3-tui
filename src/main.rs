@@ -122,6 +122,7 @@ fn left_pad(str_in: String, n: usize) -> String {
     return s;
 }
 
+// Needs to be UTF-8 safe
 fn replace_at_start(original: &str, replacement: &str) -> String {
     let mut original_chars = original.chars();
     let n = replacement.chars().count();
