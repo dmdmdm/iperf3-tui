@@ -123,10 +123,10 @@ fn left_pad(str_in: String, n: usize) -> String {
 }
 
 fn replace_at_start(original: &str, replacement: &str) -> String {
-    let original_len = original.len();
-    let mut n = replacement.len();
-    n = n.min(original_len);
-    return replacement.to_owned() + &original[n..];
+    let mut original_chars = original.chars();
+    let n = replacement.chars().count();
+    let after = original_chars.by_ref().skip(n).collect::<String>();
+    format!("{}{}", replacement, after)
 }
 
 #[allow(dead_code)]
@@ -151,13 +151,6 @@ fn background_graph(content_graph: TextContent, args: Args) {
     cmd.arg("--client").arg(args.server.clone())
        .stdout(Stdio::piped())
        .stderr(Stdio::piped());
-
-    /*
-    let flat = format!("{:?}", cmd);
-    content_graph.set_content(flat);
-    sleep(Duration::new(10,0));
-    // process::exit(1);  // TEMP
-    */
 
     let result = cmd.spawn();
     if result.is_err() {
