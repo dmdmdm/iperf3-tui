@@ -29,7 +29,9 @@ lazy_static! {
 
 fn save_pid(pid_in: u32) {
     let mut pid_opt = IPERF3_PID.lock().unwrap();
-    let pid_i32:i32 = pid_in.try_into().unwrap();
+    let result: Result<i32, _> = pid_in.try_into();
+    if result.is_err() { return; }
+    let pid_i32 = result.unwrap();
     *pid_opt = Some(pid_i32);
 }
 
@@ -71,7 +73,7 @@ fn average(numbers: &[f64]) -> f64 {
 // The bitrates come here in Mbits/sec.
 // If the average bitrate is greater than 1000 then we divide all bitrates
 // by 1000 and change the units to Gbit, for example.
-// units: in/out
+// units: is in/out
 // return: Updated bitrates
 fn scale(units: &mut String, bitrates_in: &Vec::<f64>) -> Vec::<f64> {
     let step = 1000.0;
@@ -117,7 +119,7 @@ fn scale(units: &mut String, bitrates_in: &Vec::<f64>) -> Vec::<f64> {
 fn left_pad(str_in: String, n: usize) -> String {
     let mut s = str_in;
     while s.len() < n {
-        s = " ".to_owned() + &s;
+       s = " ".to_owned() + &s;
     }
     return s;
 }
@@ -127,7 +129,7 @@ fn replace_at_start(original: &str, replacement: &str) -> String {
     let mut original_chars = original.chars();
     let n = replacement.chars().count();
     let after = original_chars.by_ref().skip(n).collect::<String>();
-    format!("{}{}", replacement, after)
+    return format!("{}{}", replacement, after)
 }
 
 #[allow(dead_code)]
@@ -239,7 +241,9 @@ fn background_graph(content_graph: TextContent, args: Args) {
             if !bitrate.is_empty() {
                 let (screen_width, screen_height) = get_screen_size();
 
-                let bitrate_f64:f64 = bitrate.parse().unwrap();
+                let bitrate_result = bitrate.parse::<f64>();
+                if bitrate_result.is_err() { continue; }
+                let bitrate_f64 = bitrate_result.unwrap();
                 bitrates.push(bitrate_f64.to_owned());
                 let graph_width = screen_width - 10;
                 let graph_height = screen_height - 8;
@@ -357,5 +361,8 @@ mod tests {
             // TODO
             return;
         }
+
+        let padded = left_pad("42", 6);
+        assert_eq!(padded, "    42");
     }
 }
