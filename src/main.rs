@@ -362,7 +362,7 @@ mod tests {
             return;
         }
 
-        let padded = left_pad("42", 6);
-        assert_eq!(padded, "    42");
+        let padded = left_pad("hello".to_string(), 9);
+        assert_eq!(padded, "    hello");
     }
 }
