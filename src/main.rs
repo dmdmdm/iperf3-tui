@@ -300,7 +300,7 @@ impl Args {
         let mut out:String = self.server.clone();
 
         if self.ipv6 { out += " IPv6"; }
-        if self.ports.is_some() {out += &(" ports ".to_owned() + &self.ports.clone().unwrap().clone()); }
+        if self.ports.is_some() { out += &(" ports ".to_owned() + &self.ports.clone().unwrap().clone()); }
         if self.reverse { out += " reverse" }
         if self.udp { out += " udp" }
 
