@@ -1,8 +1,10 @@
 # iperf3-tui
 Draw a moving speed test graph in your terminal
 
-# Screenshot
+# Screenshots
 ![Screenshot](iperf3-tui2.gif)
+
+![Select Server](select_server.png)
 
 # To use
 Linux only
