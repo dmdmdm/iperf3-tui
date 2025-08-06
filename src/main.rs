@@ -674,7 +674,7 @@ fn select_server_dialog(siv: &mut Cursive) {
     if servers_result.is_err() {
         siv.add_layer(
             Dialog::new()
-            .title("Select an iPerf3 server")
+            .title("Select an iperf3 server")
             .padding_lrtb(1, 1, 1, 0)
             .content(TextView::new(servers_result.unwrap_err().to_string()))
             .button("Close", |s| { s.pop_layer(); }));
@@ -695,7 +695,7 @@ fn select_server_dialog(siv: &mut Cursive) {
     }
 
     siv.add_layer(Dialog::around(select.scrollable())
-        .title("Select an iPerf3 server")
+        .title("Select an iperf3 server")
         .button("Cancel", |s| { s.pop_layer(); } )
     );
 }
@@ -703,7 +703,7 @@ fn select_server_dialog(siv: &mut Cursive) {
 fn enter_server_dialog(siv: &mut Cursive) {
     siv.add_layer(
         Dialog::new()
-        .title("Enter an iPerf3 server name or IP-address")
+        .title("Enter an iperf3 server name or IP-address")
         .padding_lrtb(1, 1, 1, 0)
         .content(
             EditView::new()
@@ -759,14 +759,14 @@ fn main() {
     let box3 = ResizedView::with_full_screen(tv3).with_name("box3");
     let pan3 = Panel::new(box3).title(args.friendly()).with_name("pan3");
 
-    let tv4 = TextView::new("Press 'q' to quit");
-    let box4 = ResizedView::with_min_height(1, tv4);
+    // let tv4 = TextView::new("Press 'q' to quit");
+    // let box4 = ResizedView::with_min_height(1, tv4);
 
     siv.add_layer(
        Dialog::around(
            LinearLayout::vertical()
                .child(pan3)
-               .child(box4)
+               // .child(box4)
        )
        .title("iperf3-tui")
        .h_align(HAlign::Center),
