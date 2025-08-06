@@ -11,8 +11,8 @@ Linux only
 
     git clone https://github.com/dmdmdm/iperf3-tui
     cd iperf3-tui
-    cargo run <iperf3-server>
-
+    cargo run
+    
 See public iperf3 servers on these pages:
 - https://github.com/R0GGER/public-iperf3-servers
 - https://iperf3serverlist.net
@@ -23,6 +23,8 @@ Or run your own iperf3 server:
     iperf3 --server
 
 # Options
+You can select a server from the menu or, if you prefer on the command line
+
     cargo run [-6][-p <port-range>][-R][-u] <iperf3-server>
 
 Same meaning as the iperf3 command:
