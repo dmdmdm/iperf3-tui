@@ -6,7 +6,7 @@ Draw a moving speed test graph in your terminal
 
 ![Select Server](select_server.png)
 
-List of servers gratefully from https://www.iperf3serverlist.net
+Thank you to https://www.iperf3serverlist.net for the list of servers!
 
 # To use
 Linux only
