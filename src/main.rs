@@ -638,7 +638,14 @@ fn download_servers(sink: &Sender<Box<dyn FnOnce(&mut Cursive) + Send>>) {
                 status = "Downloaded list of servers but could not save to a file - permission?".to_string();
             }
             else {
-                status = "Downloaded list of servers".to_string();
+                let servers_result = get_parsed_servers();
+                if servers_result.is_err() {
+                    status = format!("Downloaded list of servers but {}", servers_result.unwrap_err());
+                }
+                else {
+                    let servers = servers_result.unwrap();
+                    status = format!("Downloaded {} servers", servers.len());
+                }
             }
         }
     }
