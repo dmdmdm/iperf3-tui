@@ -723,6 +723,16 @@ fn enter_server_dialog(siv: &mut Cursive) {
     );
 }
 
+fn about_dialog(siv: &mut Cursive) {
+    let info = "iperf3-tui\nby Dave McKellar\nhttps://github.com/dmdmdm\n\nServer List from\nhttps://www.iperf3serverlist.net\nWith thanks!";
+
+    siv.add_layer(
+        Dialog::info(info)
+        .title("About")
+        .padding_lrtb(1, 1, 1, 0)
+    );
+}
+
 fn add_menu(siv: &mut Cursive) {
     let download_txt = if servers_file_has_content() { "Refresh list of iperf3 servers"} else { "Download list of iperf3 servers" };
 	siv.menubar()
@@ -732,6 +742,7 @@ fn add_menu(siv: &mut Cursive) {
 	            .leaf(download_txt, |s| download_servers_dialog(s))
 	            .leaf("Select Server", |s| select_server_dialog(s))
 	            .leaf("Enter Server", |s| enter_server_dialog(s))
+	            .leaf("About", |s| about_dialog(s))
 	            .leaf("Quit", on_quit)
 	    );
 	
@@ -759,14 +770,10 @@ fn main() {
     let box3 = ResizedView::with_full_screen(tv3).with_name("box3");
     let pan3 = Panel::new(box3).title(args.friendly()).with_name("pan3");
 
-    // let tv4 = TextView::new("Press 'q' to quit");
-    // let box4 = ResizedView::with_min_height(1, tv4);
-
     siv.add_layer(
        Dialog::around(
            LinearLayout::vertical()
                .child(pan3)
-               // .child(box4)
        )
        .title("iperf3-tui")
        .h_align(HAlign::Center),
