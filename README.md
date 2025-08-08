@@ -15,7 +15,7 @@ Linux only
     cd iperf3-tui
     cargo run
 
-If you don't have `git` or `cargo` they can be installed with with your disto's
+If you don't have `git` or `cargo` they can be installed with your disto's
 package manager - eg `apt install cargo`
 
 The app has a menu to select public iperf3 servers or run your own server with:
