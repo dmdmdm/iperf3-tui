@@ -1,3 +1,4 @@
+// vim:ts=4:sw=4
 use std::io::Read;
 use std::process;
 use std::process::{Command, Stdio};
@@ -15,7 +16,7 @@ use cursive::{Cursive,XY};
 use cursive::reexports::crossbeam_channel::Sender;
 use cursive::event::{Event,Key};
 use cursive::align::HAlign;
-use cursive::views::{ResizedView, Dialog, LinearLayout, TextContent, TextView, Panel, EditView, NamedView, SelectView};
+use cursive::views::{ResizedView, Dialog, LinearLayout, TextContent, TextView, Panel, EditView, NamedView, SelectView, Checkbox};
 use cursive::traits::*;
 use cursive::menu::Tree;
 use rasciigraph::{plot, Config};
@@ -79,12 +80,13 @@ fn get_screen_size() -> (u32, u32) {
     return (screen_width, screen_height);
 }
 
+#[allow(dead_code)]
 fn save_server(server: String) {
     let mut args_opt = ARGS.lock().unwrap();
     if args_opt.is_none() { return; }
     let args_ref = args_opt.as_mut().unwrap();
     args_ref.clear();
-    args_ref.server_in_cmd = Option::Some(server);
+    args_ref.server = Option::Some(server);
 }
 
 fn save_args(args_in: &Args) {
@@ -114,6 +116,24 @@ fn save_state(state_in: State) {
 //
 // Utilites
 //
+
+#[allow(dead_code)]
+fn is_space_str(s: &str) -> bool {
+    s.trim().is_empty()
+}
+
+#[allow(dead_code)]
+fn has_content_str(s: &str) -> bool {
+    ! is_space_str(s)
+}
+
+fn is_space_string(s: &String) -> bool {
+    s.trim().is_empty()
+}
+
+fn has_content_string(s: &String) -> bool {
+    ! is_space_string(s)
+}
 
 fn mkerr(txt: &str) -> std::io::Error {
     std::io::Error::new(std::io::ErrorKind::Other, txt)
@@ -430,20 +450,17 @@ struct Args {   // Alphabetical order by short
     udp: bool,
 
     #[arg(short = 'c')]
-    server_in_option: Option<String>,
-
-    // No dash in front of the server and its not required
-    server_in_cmd: Option<String>
+    server: Option<String>,
 }
 
 impl Args {
+    #[allow(dead_code)]
     fn clear(&mut self) {
         self.ipv6 = false;
         self.ports = None;
         self.reverse = false;
         self.udp = false;
-        self.server_in_option = None;
-        self.server_in_cmd = None;
+        self.server = None;
     }
 
     fn get_ports(&self) -> String {
@@ -452,9 +469,7 @@ impl Args {
     }
 
     fn get_server(&self) -> Option<String> {
-        if self.server_in_option.is_some() { return self.server_in_option.clone(); }
-        if self.server_in_cmd.is_some() { return self.server_in_cmd.clone(); }
-        None
+        return self.server.clone();
     }
 
     fn get_server_as_string(&self) -> String {
@@ -708,22 +723,63 @@ fn select_server_dialog(siv: &mut Cursive) {
 }
 
 fn enter_server_dialog(siv: &mut Cursive) {
+    log(&format!("enter_server_dialog: start"));
+    let table = LinearLayout::vertical()
+        .child(
+            LinearLayout::horizontal()
+                .child(TextView::new("IPv6:").min_width(20))
+                .child(Checkbox::new().with_name("ipv6"))
+        )
+        .child(
+            LinearLayout::horizontal()
+                .child(TextView::new("Port Range:").min_width(20))
+                .child(EditView::new().with_name("ports").min_width(25))
+        )
+        .child(
+            LinearLayout::horizontal()
+                .child(TextView::new("Reverse:").min_width(20))
+                .child(Checkbox::new().with_name("reverse"))
+        )
+        .child(
+            LinearLayout::horizontal()
+                .child(TextView::new("UDP:").min_width(20))
+                .child(Checkbox::new().with_name("udp"))
+        )
+        .child(
+            LinearLayout::horizontal()
+                .child(TextView::new("Server:").min_width(20))
+                .child(EditView::new().with_name("server").min_width(50))
+        );
     siv.add_layer(
         Dialog::new()
-        .title("Enter an iperf3 server name or IP-address")
+        .title("Enter iperf3 server details")
         .padding_lrtb(1, 1, 1, 0)
-        .content(
-            EditView::new()
-                .with_name("server")
-                .fixed_width(50),
-        )
+        .content(table)
         .button("OK", |s| {
-            let server = s.call_on_name("server", |view: &mut EditView| view.get_content()).unwrap();
-
-            let server_str = server.to_string();
-            save_server(server_str.clone());
+            log("pressed OK");
+            let ipv6 = s.call_on_name("ipv6", |view: &mut Checkbox| view.is_checked()).unwrap_or_default();
+            log(&format!("ipv6={ipv6}"));
+            log("here");
+            let ports_arc = s.call_on_name("ports", |view: &mut EditView| view.get_content()).unwrap();
+            let ports_str = ports_arc.to_string();
+            log("got ports");
+            log(&format!("ports_arc={}", ports_arc).to_string());
+            log(&format!("ports_str={}", ports_str).to_string());
+            let reverse = s.call_on_name("reverse", |view: &mut Checkbox| view.is_checked()).unwrap_or_default();
+            let udp = s.call_on_name("udp", |view: &mut Checkbox| view.is_checked()).unwrap_or_default();
+            let server_arc = s.call_on_name("server", |view: &mut EditView| view.get_content()).unwrap();
+            let server_str = server_arc.to_string();
+            log("got values");
+            let mut args = Args::default();
+            if ipv6 { args.ipv6 = ipv6; }
+            if has_content_string(&ports_str) { args.ports = Some(ports_str.to_string()); }
+            if reverse { args.reverse = reverse; }
+            if udp { args.udp = udp; }
+            if has_content_string(&server_str) { args.server = Some(server_str.to_string()); }
+            log(&format!("enter_server_dialog: server={}", server_str).to_string());
+            log(&format!("enter_server_dialog: user entered {}", args.friendly()).to_string());
+            save_args(&args.clone());
             save_state(State::ReloadRequested);
-            log(&format!("enter_server_dialog: user entered {}", server_str).to_string());
             s.pop_layer();
         })
         .button("Cancel", |s| { s.pop_layer(); })
