@@ -14,22 +14,20 @@ Linux only
     git clone https://github.com/dmdmdm/iperf3-tui
     cd iperf3-tui
     cargo run
-    
-See public iperf3 servers on these pages:
-- https://github.com/R0GGER/public-iperf3-servers
-- https://iperf3serverlist.net
-- https://iperf.fr/iperf-servers.php
 
-Or run your own iperf3 server:
+If you don't have `git` or `cargo` they can be installed with with your disto's
+package manager - eg `apt install cargo`
+
+The app has a menu to select public iperf3 servers or run your own server with:
 
     iperf3 --server
 
 # Options
-You can select a server from the menu or, if you prefer on the command line
+If you prefer, you can specify a server and other options on the command line
 
     cargo run [-6][-p <port-range>][-R][-u] <iperf3-server>
 
-Same meaning as the iperf3 command:
+The flags have the same meanings as the iperf3 command:
 - -6: Use IPv6
 - -p: port range - eg -p 5200-5209
 - -R: reverse - server sends data
