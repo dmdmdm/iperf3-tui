@@ -2,8 +2,10 @@
 Draw a moving speed test graph in your terminal
 
 # Screenshots
+Running graph:
 ![Screenshot](iperf3-tui2.gif)
 
+Selecting a server:
 ![Select Server](select-server.png)
 
 Thank you to https://www.iperf3serverlist.net for the list of servers!
