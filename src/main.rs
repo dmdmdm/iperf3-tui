@@ -159,7 +159,7 @@ fn log(txt: &str) {
         }
     }
 
-    let mut file = std::fs::OpenOptions::new().write(true).append(true).open(filename).unwrap();
+    let mut file = std::fs::OpenOptions::new().write(true).append(true).create(true).open(filename).unwrap();
     let _ = writeln!(file, "{}", txt);
 }
 
@@ -570,7 +570,7 @@ fn parse_servers_file(filename: &String) -> std::io::Result<Vec<ParsedServer>> {
     for result in rdr.records() {
         if result.is_err() { continue; }
         let record = result.unwrap();
-        if record.len() < 8 { continue; }
+        if record.len() < 7 { continue; } // Made status options
         let mut unparsed = UnparsedServer::default();
         unparsed.cmd = record.get(0).unwrap().to_string();
         unparsed.options = record.get(1).unwrap().to_string();
@@ -579,7 +579,12 @@ fn parse_servers_file(filename: &String) -> std::io::Result<Vec<ParsedServer>> {
         unparsed.site = record.get(4).unwrap().to_string();
         unparsed.provider = record.get(5).unwrap().to_string();
         unparsed.continent = record.get(6).unwrap().to_string();
-        unparsed.status = record.get(7).unwrap().to_string();
+		if (record.len() > 7) {  // Made status options
+        	unparsed.status = record.get(7).unwrap().to_string();
+		}
+		else {
+			unparsed.status = "".to_string();
+		}
         let parsed = parse_server(&unparsed);
         out.push(parsed);
     }
