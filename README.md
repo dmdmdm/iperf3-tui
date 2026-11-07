@@ -2,7 +2,7 @@
 Draw a moving speed test graph in your terminal
 
 # Screenshots
-Graph when runing a test:
+Graph when running a test:
 
 ![Screenshot](iperf3-tui2.gif)
 
